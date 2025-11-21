@@ -32,6 +32,8 @@ export default function QuestionCollector({ onChange }) {
   const [correctIndex, setCorrectIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
   const saveTimeout = useRef(null);
+  const [showExport, setShowExport] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Load saved questions from localStorage on mount
   useEffect(() => {
@@ -177,8 +179,64 @@ export default function QuestionCollector({ onChange }) {
       </div>
 
       <div style={{ marginTop: 16 }}>
-        <h3>Exported JSON</h3>
-        <pre style={{ background: '#f6f8fa', padding: 8, overflowX: 'auto' }}>{JSON.stringify(questions, null, 2)}</pre>
+        <button type="button" onClick={() => setShowExport((s) => !s)}>
+          {showExport ? 'Hide JSON' : 'Show JSON'}
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            const payload = JSON.stringify(questions, null, 2);
+            try {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(payload);
+              } else {
+                const ta = document.createElement('textarea');
+                ta.value = payload;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+              }
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            } catch (err) {
+              console.error('Copy failed', err);
+              alert('Unable to copy JSON to clipboard');
+            }
+          }}
+          disabled={questions.length === 0}
+          style={{ marginLeft: 8 }}
+        >
+          Copy JSON
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const payload = JSON.stringify(questions, null, 2);
+            const blob = new Blob([payload], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'questions.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }}
+          disabled={questions.length === 0}
+          style={{ marginLeft: 8 }}
+        >
+          Download JSON
+        </button>
+        {copied && <span style={{ marginLeft: 8, color: 'green' }}>Copied!</span>}
+        {showExport && (
+          <div style={{ marginTop: 8 }}>
+            <h3>Exported JSON</h3>
+            <pre style={{ background: '#f6f8fa', padding: 8, overflowX: 'auto' }}>{JSON.stringify(questions, null, 2)}</pre>
+          </div>
+        )}
       </div>
     </div>
   );
