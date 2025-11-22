@@ -3,13 +3,20 @@ import QuestionCollector from "./QuestionCollector";
 import QuizPlayer from "./QuizPlayer";
 
 function App() {
-  const [collected, setCollected] = useState([]);
+  const [collected, setCollected] = useState(() => {
+    try {
+      const saved = localStorage.getItem("quizapp:questions");
+      return saved ? JSON.parse(saved) : [];
+    } catch (err) {
+      console.error("Failed to load questions", err);
+      return [];
+    }
+  });
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("darkMode");
     return saved ? JSON.parse(saved) : false;
   });
   const [showSavedQuestions, setShowSavedQuestions] = useState(false);
-  const [showCollector, setShowCollector] = useState(true);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -118,7 +125,7 @@ function App() {
                 onClick={() => setShowSavedQuestions(!showSavedQuestions)}
                 className="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
-                Show
+                Questions
               </button>
 
               <button
@@ -126,7 +133,7 @@ function App() {
                 disabled={collected.length === 0}
                 className="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {copied ? "✓ Copied!" : "Copy JSON"}
+                {copied ? "✓ Copied!" : "Copy"}
               </button>
 
               <button
@@ -134,7 +141,7 @@ function App() {
                 disabled={collected.length === 0}
                 className="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Download JSON
+                Download
               </button>
 
               <label>
@@ -145,7 +152,7 @@ function App() {
                   onChange={handleUploadJSON}
                 />
                 <span className="inline-block px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer">
-                  Upload JSON
+                  Upload
                 </span>
               </label>
 
@@ -161,36 +168,48 @@ function App() {
       </nav>
 
       {/* Saved Questions Display */}
-      {showSavedQuestions && collected.length > 0 && (
+      {showSavedQuestions && (
         <div className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <h3 className="text-lg font-semibold mb-3">Saved Questions</h3>
-            <ol className="space-y-3">
-              {collected.map((q, i) => (
-                <li
-                  key={i}
-                  className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700"
-                >
-                  <div className="font-semibold mb-2">
-                    {i + 1}. {q.question}
-                  </div>
-                  <ul className="ml-4 space-y-1">
-                    {q.answers.map((ans, ai) => (
+            <h3 className="text-lg font-semibold mb-3">Add Questions</h3>
+            <QuestionCollector onChange={setCollected} />
+
+            {collected.length > 0 && (
+              <>
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold mb-3">
+                    Saved ({collected.length})
+                  </h3>
+                  <ol className="space-y-3">
+                    {collected.map((q, i) => (
                       <li
-                        key={ai}
-                        className={
-                          ai === q.correctAnswerIndex
-                            ? "text-green-600 dark:text-green-400"
-                            : ""
-                        }
+                        key={i}
+                        className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700"
                       >
-                        {ans} {ai === q.correctAnswerIndex ? "(correct)" : ""}
+                        <div className="font-semibold mb-2">
+                          {i + 1}. {q.question}
+                        </div>
+                        <ul className="ml-4 space-y-1">
+                          {q.answers.map((ans, ai) => (
+                            <li
+                              key={ai}
+                              className={
+                                ai === q.correctAnswerIndex
+                                  ? "text-green-600 dark:text-green-400"
+                                  : ""
+                              }
+                            >
+                              {ans}{" "}
+                              {ai === q.correctAnswerIndex ? "(correct)" : ""}
+                            </li>
+                          ))}
+                        </ul>
                       </li>
                     ))}
-                  </ul>
-                </li>
-              ))}
-            </ol>
+                  </ol>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -201,18 +220,6 @@ function App() {
           <h2 className="text-xl font-semibold mb-4">Play Quiz</h2>
           <QuizPlayer questions={collected} />
         </div>
-        {collected.length > 0 && (
-          <div className="mb-4">
-            <button
-              onClick={() => setShowCollector(!showCollector)}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-            >
-              {showCollector ? "Hide" : "Show"} Question Collector
-            </button>
-          </div>
-        )}
-
-        {showCollector && <QuestionCollector onChange={setCollected} />}
       </div>
     </div>
   );
