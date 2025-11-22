@@ -1,10 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 
-const STORAGE_KEY = 'quizapp:questions';
+const STORAGE_KEY = "quizapp:questions";
 
-function AnswerInput({ answer, index, onChange, onRemove, isCorrect, onSetCorrect }) {
+function AnswerInput({
+  answer,
+  index,
+  onChange,
+  onRemove,
+  isCorrect,
+  onSetCorrect,
+}) {
   return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+    <div
+      style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}
+    >
       <input
         type="text"
         placeholder={`Answer ${index + 1}`}
@@ -12,7 +21,7 @@ function AnswerInput({ answer, index, onChange, onRemove, isCorrect, onSetCorrec
         onChange={(e) => onChange(index, e.target.value)}
         style={{ flex: 1 }}
       />
-      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <label style={{ display: "flex", alignItems: "center", gap: 4 }}>
         <input
           type="radio"
           name="correct"
@@ -21,19 +30,22 @@ function AnswerInput({ answer, index, onChange, onRemove, isCorrect, onSetCorrec
         />
         Correct
       </label>
-      <button type="button" onClick={() => onRemove(index)}>Remove</button>
+      <button type="button" onClick={() => onRemove(index)}>
+        Remove
+      </button>
     </div>
   );
 }
 
 export default function QuestionCollector({ onChange }) {
-  const [questionText, setQuestionText] = useState('');
-  const [answers, setAnswers] = useState(['', '']);
+  const [questionText, setQuestionText] = useState("");
+  const [answers, setAnswers] = useState(["", ""]);
   const [correctIndex, setCorrectIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
   const saveTimeout = useRef(null);
   const [showExport, setShowExport] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showQuestions, setShowQuestions] = useState(true);
 
   // Load saved questions from localStorage on mount
   useEffect(() => {
@@ -44,7 +56,7 @@ export default function QuestionCollector({ onChange }) {
         if (Array.isArray(parsed)) setQuestions(parsed);
       }
     } catch (err) {
-      console.error('Failed to read saved questions from localStorage', err);
+      console.error("Failed to read saved questions from localStorage", err);
     }
   }, []);
 
@@ -56,7 +68,7 @@ export default function QuestionCollector({ onChange }) {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(questions));
         } catch (err) {
-          console.error('Failed to save questions to localStorage', err);
+          console.error("Failed to save questions to localStorage", err);
         }
       }, 300);
       return () => clearTimeout(saveTimeout.current);
@@ -70,15 +82,15 @@ export default function QuestionCollector({ onChange }) {
     function onStorage(e) {
       if (e.key === STORAGE_KEY) {
         try {
-          const parsed = JSON.parse(e.newValue || '[]');
+          const parsed = JSON.parse(e.newValue || "[]");
           setQuestions(Array.isArray(parsed) ? parsed : []);
         } catch (err) {
-          console.error('Failed to parse storage event data', err);
+          console.error("Failed to parse storage event data", err);
         }
       }
     }
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   useEffect(() => {
@@ -90,7 +102,7 @@ export default function QuestionCollector({ onChange }) {
   }
 
   function addAnswer() {
-    setAnswers((a) => [...a, '']);
+    setAnswers((a) => [...a, ""]);
   }
 
   function removeAnswer(i) {
@@ -100,13 +112,15 @@ export default function QuestionCollector({ onChange }) {
 
   function addQuestion() {
     const trimmedQ = questionText.trim();
-    const cleanedAnswers = answers.map((a) => a.trim()).filter((a) => a.length > 0);
+    const cleanedAnswers = answers
+      .map((a) => a.trim())
+      .filter((a) => a.length > 0);
     if (!trimmedQ) {
-      alert('Please enter a question');
+      alert("Please enter a question");
       return;
     }
     if (cleanedAnswers.length < 2) {
-      alert('Please provide at least two answers');
+      alert("Please provide at least two answers");
       return;
     }
     const correct = Math.min(correctIndex, cleanedAnswers.length - 1);
@@ -117,8 +131,8 @@ export default function QuestionCollector({ onChange }) {
     };
     setQuestions((qs) => [...qs, newQ]);
     // reset form
-    setQuestionText('');
-    setAnswers(['', '']);
+    setQuestionText("");
+    setAnswers(["", ""]);
     setCorrectIndex(0);
   }
 
@@ -127,7 +141,7 @@ export default function QuestionCollector({ onChange }) {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '16px 0' }}>
+    <div style={{ maxWidth: 800, margin: "16px 0" }}>
       <h2>Question Collector</h2>
       <div style={{ marginBottom: 8 }}>
         <input
@@ -135,7 +149,7 @@ export default function QuestionCollector({ onChange }) {
           placeholder="Enter question text"
           value={questionText}
           onChange={(e) => setQuestionText(e.target.value)}
-          style={{ width: '100%', padding: 8 }}
+          style={{ width: "100%", padding: 8 }}
         />
       </div>
 
@@ -152,35 +166,68 @@ export default function QuestionCollector({ onChange }) {
             onSetCorrect={setCorrectIndex}
           />
         ))}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" onClick={addAnswer}>Add Answer</button>
-          <button type="button" onClick={addQuestion}>Save Question</button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button type="button" onClick={addAnswer}>
+            Add Answer
+          </button>
+          <button type="button" onClick={addQuestion}>
+            Save Question
+          </button>
         </div>
       </div>
 
       <div style={{ marginTop: 12 }}>
-        <h3>Saved Questions ({questions.length})</h3>
-        {questions.length === 0 && <div>No questions yet</div>}
-        <ol>
-          {questions.map((q, i) => (
-            <li key={i} style={{ marginBottom: 8 }}>
-              <div><strong>{q.question}</strong></div>
-              <ul>
-                {q.answers.map((ans, ai) => (
-                  <li key={ai} style={{ color: ai === q.correctAnswerIndex ? 'green' : 'inherit' }}>
-                    {ans} {ai === q.correctAnswerIndex ? '(correct)' : ''}
-                  </li>
-                ))}
-              </ul>
-              <button type="button" onClick={() => removeQuestion(i)}>Remove</button>
-            </li>
-          ))}
-        </ol>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 8,
+          }}
+        >
+          <h3 style={{ margin: 0 }}>Saved Questions ({questions.length})</h3>
+          <button
+            type="button"
+            onClick={() => setShowQuestions(!showQuestions)}
+          >
+            {showQuestions ? "Hide" : "Show"}
+          </button>
+        </div>
+        {showQuestions && (
+          <>
+            {questions.length === 0 && <div>No questions yet</div>}
+            <ol>
+              {questions.map((q, i) => (
+                <li key={i} style={{ marginBottom: 8 }}>
+                  <div>
+                    <strong>{q.question}</strong>
+                  </div>
+                  <ul>
+                    {q.answers.map((ans, ai) => (
+                      <li
+                        key={ai}
+                        style={{
+                          color:
+                            ai === q.correctAnswerIndex ? "green" : "inherit",
+                        }}
+                      >
+                        {ans} {ai === q.correctAnswerIndex ? "(correct)" : ""}
+                      </li>
+                    ))}
+                  </ul>
+                  <button type="button" onClick={() => removeQuestion(i)}>
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
       </div>
 
       <div style={{ marginTop: 16 }}>
         <button type="button" onClick={() => setShowExport((s) => !s)}>
-          {showExport ? 'Hide JSON' : 'Show JSON'}
+          {showExport ? "Hide JSON" : "Show JSON"}
         </button>
         <button
           type="button"
@@ -190,20 +237,20 @@ export default function QuestionCollector({ onChange }) {
               if (navigator.clipboard && navigator.clipboard.writeText) {
                 await navigator.clipboard.writeText(payload);
               } else {
-                const ta = document.createElement('textarea');
+                const ta = document.createElement("textarea");
                 ta.value = payload;
-                ta.style.position = 'fixed';
-                ta.style.left = '-9999px';
+                ta.style.position = "fixed";
+                ta.style.left = "-9999px";
                 document.body.appendChild(ta);
                 ta.select();
-                document.execCommand('copy');
+                document.execCommand("copy");
                 document.body.removeChild(ta);
               }
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
             } catch (err) {
-              console.error('Copy failed', err);
-              alert('Unable to copy JSON to clipboard');
+              console.error("Copy failed", err);
+              alert("Unable to copy JSON to clipboard");
             }
           }}
           disabled={questions.length === 0}
@@ -215,11 +262,11 @@ export default function QuestionCollector({ onChange }) {
           type="button"
           onClick={() => {
             const payload = JSON.stringify(questions, null, 2);
-            const blob = new Blob([payload], { type: 'application/json' });
+            const blob = new Blob([payload], { type: "application/json" });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = url;
-            a.download = 'questions.json';
+            a.download = "questions.json";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -230,11 +277,72 @@ export default function QuestionCollector({ onChange }) {
         >
           Download JSON
         </button>
-        {copied && <span style={{ marginLeft: 8, color: 'green' }}>Copied!</span>}
+        <label style={{ marginLeft: 8 }}>
+          <input
+            type="file"
+            accept=".json,application/json"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                try {
+                  const parsed = JSON.parse(event.target.result);
+                  if (!Array.isArray(parsed)) {
+                    alert("Invalid JSON: expected an array of questions");
+                    return;
+                  }
+
+                  // Validate structure
+                  const valid = parsed.every(
+                    (q) =>
+                      q.question &&
+                      Array.isArray(q.answers) &&
+                      q.answers.length >= 2 &&
+                      typeof q.correctAnswerIndex === "number" &&
+                      q.correctAnswerIndex >= 0 &&
+                      q.correctAnswerIndex < q.answers.length
+                  );
+
+                  if (!valid) {
+                    alert(
+                      "Invalid JSON structure. Each question must have: question, answers (array), and correctAnswerIndex"
+                    );
+                    return;
+                  }
+
+                  setQuestions(parsed);
+                  setShowQuestions(false);
+                  alert(`Successfully imported ${parsed.length} question(s)`);
+                } catch (err) {
+                  console.error("Failed to parse JSON", err);
+                  alert("Failed to parse JSON file. Please check the format.");
+                }
+              };
+              reader.readAsText(file);
+              e.target.value = ""; // Reset input
+            }}
+          />
+          <button
+            type="button"
+            onClick={(e) => e.target.previousSibling.click()}
+          >
+            Upload JSON
+          </button>
+        </label>
+        {copied && (
+          <span style={{ marginLeft: 8, color: "green" }}>Copied!</span>
+        )}
         {showExport && (
           <div style={{ marginTop: 8 }}>
             <h3>Exported JSON</h3>
-            <pre style={{ background: '#f6f8fa', padding: 8, overflowX: 'auto' }}>{JSON.stringify(questions, null, 2)}</pre>
+            <pre
+              style={{ background: "#f6f8fa", padding: 8, overflowX: "auto" }}
+            >
+              {JSON.stringify(questions, null, 2)}
+            </pre>
           </div>
         )}
       </div>
