@@ -43,9 +43,6 @@ export default function QuestionCollector({ onChange }) {
   const [correctIndex, setCorrectIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
   const saveTimeout = useRef(null);
-  const [showExport, setShowExport] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [showQuestions, setShowQuestions] = useState(true);
 
   // Load saved questions from localStorage on mount
   useEffect(() => {
@@ -136,10 +133,6 @@ export default function QuestionCollector({ onChange }) {
     setCorrectIndex(0);
   }
 
-  function removeQuestion(i) {
-    setQuestions((qs) => qs.filter((_, idx) => idx !== i));
-  }
-
   return (
     <div style={{ maxWidth: 800, margin: "16px 0" }}>
       <h2>Question Collector</h2>
@@ -174,177 +167,6 @@ export default function QuestionCollector({ onChange }) {
             Save Question
           </button>
         </div>
-      </div>
-
-      <div style={{ marginTop: 12 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginBottom: 8,
-          }}
-        >
-          <h3 style={{ margin: 0 }}>Saved Questions ({questions.length})</h3>
-          <button
-            type="button"
-            onClick={() => setShowQuestions(!showQuestions)}
-          >
-            {showQuestions ? "Hide" : "Show"}
-          </button>
-        </div>
-        {showQuestions && (
-          <>
-            {questions.length === 0 && <div>No questions yet</div>}
-            <ol>
-              {questions.map((q, i) => (
-                <li key={i} style={{ marginBottom: 8 }}>
-                  <div>
-                    <strong>{q.question}</strong>
-                  </div>
-                  <ul>
-                    {q.answers.map((ans, ai) => (
-                      <li
-                        key={ai}
-                        style={{
-                          color:
-                            ai === q.correctAnswerIndex ? "green" : "inherit",
-                        }}
-                      >
-                        {ans} {ai === q.correctAnswerIndex ? "(correct)" : ""}
-                      </li>
-                    ))}
-                  </ul>
-                  <button type="button" onClick={() => removeQuestion(i)}>
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </>
-        )}
-      </div>
-
-      <div style={{ marginTop: 16 }}>
-        <button type="button" onClick={() => setShowExport((s) => !s)}>
-          {showExport ? "Hide JSON" : "Show JSON"}
-        </button>
-        <button
-          type="button"
-          onClick={async () => {
-            const payload = JSON.stringify(questions, null, 2);
-            try {
-              if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(payload);
-              } else {
-                const ta = document.createElement("textarea");
-                ta.value = payload;
-                ta.style.position = "fixed";
-                ta.style.left = "-9999px";
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand("copy");
-                document.body.removeChild(ta);
-              }
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            } catch (err) {
-              console.error("Copy failed", err);
-              alert("Unable to copy JSON to clipboard");
-            }
-          }}
-          disabled={questions.length === 0}
-          style={{ marginLeft: 8 }}
-        >
-          Copy JSON
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            const payload = JSON.stringify(questions, null, 2);
-            const blob = new Blob([payload], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "questions.json";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          }}
-          disabled={questions.length === 0}
-          style={{ marginLeft: 8 }}
-        >
-          Download JSON
-        </button>
-        <label style={{ marginLeft: 8 }}>
-          <input
-            type="file"
-            accept=".json,application/json"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                try {
-                  const parsed = JSON.parse(event.target.result);
-                  if (!Array.isArray(parsed)) {
-                    alert("Invalid JSON: expected an array of questions");
-                    return;
-                  }
-
-                  // Validate structure
-                  const valid = parsed.every(
-                    (q) =>
-                      q.question &&
-                      Array.isArray(q.answers) &&
-                      q.answers.length >= 2 &&
-                      typeof q.correctAnswerIndex === "number" &&
-                      q.correctAnswerIndex >= 0 &&
-                      q.correctAnswerIndex < q.answers.length
-                  );
-
-                  if (!valid) {
-                    alert(
-                      "Invalid JSON structure. Each question must have: question, answers (array), and correctAnswerIndex"
-                    );
-                    return;
-                  }
-
-                  setQuestions(parsed);
-                  setShowQuestions(false);
-                  alert(`Successfully imported ${parsed.length} question(s)`);
-                } catch (err) {
-                  console.error("Failed to parse JSON", err);
-                  alert("Failed to parse JSON file. Please check the format.");
-                }
-              };
-              reader.readAsText(file);
-              e.target.value = ""; // Reset input
-            }}
-          />
-          <button
-            type="button"
-            onClick={(e) => e.target.previousSibling.click()}
-          >
-            Upload JSON
-          </button>
-        </label>
-        {copied && (
-          <span style={{ marginLeft: 8, color: "green" }}>Copied!</span>
-        )}
-        {showExport && (
-          <div style={{ marginTop: 8 }}>
-            <h3>Exported JSON</h3>
-            <pre
-              style={{ background: "#f6f8fa", padding: 8, overflowX: "auto" }}
-            >
-              {JSON.stringify(questions, null, 2)}
-            </pre>
-          </div>
-        )}
       </div>
     </div>
   );
