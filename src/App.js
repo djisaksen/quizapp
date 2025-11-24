@@ -113,7 +113,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold">Quiz App</h1>
+              <h1 className="text-2xl font-bold">Q & Ai</h1>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600 dark:text-gray-400 mr-2">
@@ -133,7 +133,7 @@ function App() {
                 disabled={collected.length === 0}
                 className="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {copied ? "✓ Copied!" : "Copy"}
+                {copied ? "✓ Copied!" : "Copy JSON"}
               </button>
 
               <button
@@ -141,7 +141,7 @@ function App() {
                 disabled={collected.length === 0}
                 className="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Download
+                Download JSON
               </button>
 
               <label>
@@ -152,7 +152,7 @@ function App() {
                   onChange={handleUploadJSON}
                 />
                 <span className="inline-block px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer">
-                  Upload
+                  Upload JSON
                 </span>
               </label>
 
@@ -171,14 +171,14 @@ function App() {
       {showSavedQuestions && (
         <div className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <h3 className="text-lg font-semibold mb-3">Add Questions</h3>
+            <h3 className="text-lg font-semibold mb-3">Question Collector</h3>
             <QuestionCollector onChange={setCollected} />
 
             {collected.length > 0 && (
               <>
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                   <h3 className="text-lg font-semibold mb-3">
-                    Saved ({collected.length})
+                    Saved Questions ({collected.length})
                   </h3>
                   <ol className="space-y-3">
                     {collected.map((q, i) => (

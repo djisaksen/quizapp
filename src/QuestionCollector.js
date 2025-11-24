@@ -135,6 +135,7 @@ export default function QuestionCollector({ onChange }) {
 
   return (
     <div style={{ maxWidth: 800, margin: "16px 0" }}>
+      <h2>Question Collector</h2>
       <div style={{ marginBottom: 8 }}>
         <input
           type="text"
@@ -146,6 +147,7 @@ export default function QuestionCollector({ onChange }) {
       </div>
 
       <div style={{ marginBottom: 8 }}>
+        <strong>Answers</strong>
         {answers.map((a, i) => (
           <AnswerInput
             key={i}

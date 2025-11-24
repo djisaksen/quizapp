@@ -7,7 +7,11 @@ export default function QuizPlayer({ questions = [], onFinish }) {
   const [showAnswer, setShowAnswer] = useState(false);
 
   if (!Array.isArray(questions) || questions.length === 0) {
-    return <div style={{ marginTop: 12 }}>No questions to play.</div>;
+    return (
+      <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-3">
+        No questions to play.
+      </div>
+    );
   }
 
   const q = questions[index];
@@ -43,32 +47,19 @@ export default function QuizPlayer({ questions = [], onFinish }) {
   }
 
   return (
-    <div
-      style={{
-        marginTop: 18,
-        padding: 12,
-        border: "1px solid #ddd",
-        borderRadius: 6,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: 8,
-        }}
-      >
+    <div className="mt-3 sm:mt-4 p-3 sm:p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+      <div className="flex justify-between items-center mb-3 sm:mb-4 text-sm sm:text-base">
         <strong>
           Question {index + 1} / {questions.length}
         </strong>
         <span>Score: {score}</span>
       </div>
 
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ fontWeight: 600 }}>{q.question}</div>
+      <div className="mb-3 sm:mb-4">
+        <div className="font-semibold text-sm sm:text-base">{q.question}</div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div className="flex flex-col gap-2 sm:gap-3">
         {q.answers.map((ans, i) => {
           const isSelected = i === selected;
           const isCorrect = i === q.correctAnswerIndex;
@@ -78,20 +69,15 @@ export default function QuizPlayer({ questions = [], onFinish }) {
             <button
               key={i}
               onClick={() => handleSelect(i)}
-              style={{
-                textAlign: "left",
-                padding: "8px 12px",
-                borderRadius: 4,
-                border: "1px solid #ccc",
-                background: showCorrect
-                  ? "#dff0d8"
+              className={`text-left px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base rounded border transition-colors ${
+                showCorrect
+                  ? "bg-green-100 dark:bg-green-900 border-green-500 dark:border-green-400"
                   : showWrong
-                  ? "#f8d7da"
+                  ? "bg-red-100 dark:bg-red-900 border-red-500 dark:border-red-400"
                   : isSelected
-                  ? "#eef"
-                  : "#fff",
-                cursor: showAnswer ? "default" : "pointer",
-              }}
+                  ? "bg-blue-50 dark:bg-blue-900 border-blue-500 dark:border-blue-400"
+                  : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+              } ${showAnswer ? "cursor-default" : "cursor-pointer"}`}
               disabled={showAnswer}
             >
               {ans}
@@ -100,27 +86,43 @@ export default function QuizPlayer({ questions = [], onFinish }) {
         })}
       </div>
 
-      <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+      <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
         {!showAnswer ? (
-          <button onClick={handleSubmit} disabled={selected === null}>
+          <button
+            onClick={handleSubmit}
+            disabled={selected === null}
+            className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Submit
           </button>
         ) : (
           <>
-            <div style={{ alignSelf: "center" }}>
+            <div className="flex items-center text-sm sm:text-base">
               {selected === q.correctAnswerIndex ? (
-                <span style={{ color: "green" }}>Correct</span>
+                <span className="text-green-600 dark:text-green-400 font-semibold">
+                  ✓ Correct
+                </span>
               ) : (
-                <span style={{ color: "red" }}>Incorrect</span>
+                <span className="text-red-600 dark:text-red-400 font-semibold">
+                  ✗ Incorrect
+                </span>
               )}
             </div>
-            <button onClick={handleNext}>
+            <button
+              onClick={handleNext}
+              className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
               {index + 1 >= questions.length ? "Finish" : "Next"}
             </button>
           </>
         )}
 
-        <button onClick={handleRestart}>Restart</button>
+        <button
+          onClick={handleRestart}
+          className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+        >
+          Restart
+        </button>
       </div>
     </div>
   );
