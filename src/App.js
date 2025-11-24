@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import QuestionCollector from "./QuestionCollector";
 import QuizPlayer from "./QuizPlayer";
+import AIQuestionGenerator from "./AIQuestionGenerator";
 
 function App() {
   const [collected, setCollected] = useState(() => {
@@ -17,6 +18,7 @@ function App() {
     return saved ? JSON.parse(saved) : false;
   });
   const [showSavedQuestions, setShowSavedQuestions] = useState(false);
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -94,7 +96,6 @@ function App() {
           return;
         }
 
-        // Update collected questions directly
         setCollected(parsed);
         alert(`Successfully imported ${parsed.length} question(s)`);
       } catch (err) {
@@ -104,6 +105,11 @@ function App() {
     };
     reader.readAsText(file);
     e.target.value = "";
+  };
+
+  const handleAIQuestionsGenerated = (newQuestions) => {
+    setCollected((prev) => [...prev, ...newQuestions]);
+    setShowAIGenerator(false);
   };
 
   return (
@@ -122,7 +128,20 @@ function App() {
               </span>
 
               <button
-                onClick={() => setShowSavedQuestions(!showSavedQuestions)}
+                onClick={() => {
+                  setShowAIGenerator(!showAIGenerator);
+                  setShowSavedQuestions(false);
+                }}
+                className="px-3 py-2 text-sm rounded-lg border border-blue-500 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"
+              >
+                ✨ AI Generate
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowSavedQuestions(!showSavedQuestions);
+                  setShowAIGenerator(false);
+                }}
                 className="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
                 Questions
@@ -166,6 +185,17 @@ function App() {
           </div>
         </div>
       </nav>
+
+      {/* AI Generator Panel */}
+      {showAIGenerator && (
+        <div className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <AIQuestionGenerator
+              onQuestionsGenerated={handleAIQuestionsGenerated}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Saved Questions Display */}
       {showSavedQuestions && (
